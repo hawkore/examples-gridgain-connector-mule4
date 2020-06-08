@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd
+">
+	<http:listener-config name="HTTP_Listener_Configuration" doc:name="HTTP Listener config"
+		doc:id="12bf7610-de7f-4506-bcc7-c99759e1793d">
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+
+	<apache-ignite:connection-manager name="ignite1" igniteInstanceName="ignite1"
+		igniteSpringCfgFile="ignite/ignite1.xml" doc:name="GridGain: Ignite Connection Manager">
+		<apache-ignite:cache-defs>
+			<apache-ignite:cache-def cacheName="CACHE1">
+				<apache-ignite:cache-config>
+					<apache-ignite:simple-cache-configuration />
+				</apache-ignite:cache-config>
+			</apache-ignite:cache-def>
+		</apache-ignite:cache-defs>
+		<apache-ignite:set-defs>
+			<apache-ignite:set-def setName="SET1">
+				<apache-ignite:collection-config>
+					<apache-ignite:simple-collection-configuration />
+				</apache-ignite:collection-config>
+			</apache-ignite:set-def>
+		</apache-ignite:set-defs>
+		<apache-ignite:queue-defs>
+			<apache-ignite:queue-def queueName="QUEUE1">
+				<apache-ignite:collection-config>
+					<apache-ignite:simple-collection-configuration />
+				</apache-ignite:collection-config>
+			</apache-ignite:queue-def>
+			<apache-ignite:queue-def queueName="QUEUE_PUBCON">
+				<apache-ignite:collection-config>
+					<apache-ignite:simple-collection-configuration />
+				</apache-ignite:collection-config>
+			</apache-ignite:queue-def>
+			<apache-ignite:queue-def queueName="QUEUE_SRC">
+				<apache-ignite:collection-config>
+					<apache-ignite:simple-collection-configuration />
+				</apache-ignite:collection-config>
+			</apache-ignite:queue-def>
+		</apache-ignite:queue-defs>
+		<apache-ignite:topic-defs>
+			<apache-ignite:topic-def topicName="TOPIC" />
+		</apache-ignite:topic-defs>
+		<apache-ignite:atomic-long-defs>
+			<apache-ignite:atomic-long-def atomicName="LONG">
+				<apache-ignite:atomic-config>
+					<apache-ignite:simple-atomic-configuration />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-long-def>
+		</apache-ignite:atomic-long-defs>
+		<apache-ignite:atomic-reference-defs>
+			<apache-ignite:atomic-reference-def atomicName="REF">
+				<apache-ignite:atomic-config>
+					<apache-ignite:simple-atomic-configuration />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-reference-def>
+			<apache-ignite:atomic-reference-def atomicName="BATCH">
+				<apache-ignite:atomic-config>
+					<apache-ignite:simple-atomic-configuration />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-reference-def>
+		</apache-ignite:atomic-reference-defs>
+		<apache-ignite:atomic-sequence-defs>
+			<apache-ignite:atomic-sequence-def atomicName="SEQ">
+				<apache-ignite:atomic-config>
+					<apache-ignite:simple-atomic-configuration />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-sequence-def>
+			<apache-ignite:atomic-sequence-def atomicName="SEQ_SCHEDULER">
+				<apache-ignite:atomic-config>
+					<apache-ignite:simple-atomic-configuration />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-sequence-def>
+		</apache-ignite:atomic-sequence-defs>
+		<apache-ignite:atomic-stamped-defs>
+			<apache-ignite:atomic-stamped-def atomicName="STAMP">
+				<apache-ignite:atomic-config>
+					<apache-ignite:simple-atomic-configuration />
+				</apache-ignite:atomic-config>
+			</apache-ignite:atomic-stamped-def>
+		</apache-ignite:atomic-stamped-defs>
+		<apache-ignite:lock-defs>
+			<apache-ignite:lock-def lockName="LOCK" />
+		</apache-ignite:lock-defs>
+		<apache-ignite:semaphore-defs>
+			<apache-ignite:semaphore-def semaphoreName="SEMAPHORE" count="1" />
+		</apache-ignite:semaphore-defs>
+		<apache-ignite:countdownlatch-defs>
+			<apache-ignite:countdownlatch-def countdownLatchName="COUNTDOWNLATCH" count="5"
+				autodelete="true" />
+		</apache-ignite:countdownlatch-defs>
+	</apache-ignite:connection-manager>
+
+	<apache-ignite:connection-manager name="ignite2" doc:name="ignite2"
+		igniteSpringCfgFile="ignite/ignite2.xml" />
+
+	<apache-ignite:config name="ignConfig" doc:name="GridGain: Configuration">
+		<apache-ignite:connection manager-ref="ignite1" />
+	</apache-ignite:config>
+
+	<sub-flow name="exceptionStrategy">
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+error.description]" doc:name="payload: json: exception cause" />
+	</sub-flow>
+
+</mule>

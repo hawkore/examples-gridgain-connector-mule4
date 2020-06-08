@@ -1,0 +1,78 @@
+<!--
+
+    (c) 2018 HAWKORE, S.L. - All Rights Reserved
+    Unauthorized copying of this file, via any medium is strictly prohibited
+    Proprietary and confidential
+
+    A copy of the license terms has been included with this distribution in the LICENSE.md file.
+    ---
+    Derechos de Autor (C) 2018 HAWKORE, S.L. - Todos los derechos reservados
+    Se prohibe estrictamente la copia sin autorización de este fichero por cualquier medio
+    Propietario y confidencial
+
+    Se incluye una copia de los términos de la licencia en el archivo LICENSE.md en esta distribución.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- JQuery will be required for this demo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+
+    <!-- Keep this simple ... define CSS for this simple webpage in the same file -->
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <script src="js/demo.js"></script>
+    <script type="text/javascript">
+    
+        $(document).ready( function() {
+
+            var paramSemaphore = { id : "semaphore", label : "Semaphore's name", defaultValue : "SEMAPHORE" };
+            var paramPermits = { id : "permits", label : "Permit count, must be greater than zero", defaultValue : "1" };
+
+            getTest('semaphoreInstance', null, {
+                title:"Semaphore instance", description:"Retrieve the semaphore instance (gives direct access to API)",
+                action:"Instance", params : [ paramSemaphore ], defPanel: true
+            });
+
+            getTest('semaphoreAcquirePermits', null, {
+                title:"Semaphore acquire permits", description:"Acquire permits from the designed semaphore",
+                action:"Acquire", params : [ paramSemaphore, paramPermits,
+                 { id : "timeout", label : "How long to wait: timeout < 0 wait forever, timeout = 0 do not wait, timeout > 0 wait the specified time", defaultValue : "10" },
+                 { id : "timeoutUnit", label : "The timeout unit", defaultValue : "SECONDS" }
+                  ]
+            });
+
+            getTest('semaphoreDrainPermits', null, {
+                title:"Semaphore drain permits", description:"Acquire all permits immediately available from a semaphore",
+                action:"Drain", params : [ paramSemaphore ]
+            });
+
+            getTest('semaphoreResetPermits', null, {
+                title:"Semaphore reset permits", description:"Acquire all permits immediately available from a semaphore and release new permits",
+                action:"Reset", params : [ paramSemaphore, paramPermits ]
+            });
+
+            getTest('semaphoreReleasePermits', null, {
+                title:"Semaphore release permits", description:"Release permits from semaphore",
+                action:"Release", params : [ paramSemaphore, paramPermits ]
+            });
+
+            // Triggers the loading spinner for every button that is clicked
+            $('button').click(function(){
+                $(this).button('loading');
+            });
+        });
+
+    </script>
+
+</head>
+<body>
+<div class="container">
+    <div class="panel-group" id="accordion">
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!--
+
+    (c) 2018 HAWKORE, S.L. - All Rights Reserved
+    Unauthorized copying of this file, via any medium is strictly prohibited
+    Proprietary and confidential
+
+    A copy of the license terms has been included with this distribution in the LICENSE.md file.
+    ---
+    Derechos de Autor (C) 2018 HAWKORE, S.L. - Todos los derechos reservados
+    Se prohibe estrictamente la copia sin autorización de este fichero por cualquier medio
+    Propietario y confidencial
+
+    Se incluye una copia de los términos de la licencia en el archivo LICENSE.md en esta distribución.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- JQuery will be required for this demo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+
+    <!-- Keep this simple ... define CSS for this simple webpage in the same file -->
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <script src="js/demo.js"></script>
+    <script type="text/javascript">
+    
+        $(document).ready( function() {
+
+            var paramCache = { id : "cache", label : "The cache's name", defaultValue : "CACHESCOPE" };
+            var paramKey = { id : "key", label : "Cache entry key, must be serializable", defaultValue : "key" };
+            var paramMustSerialize = { id : "mustSerialize", label : "Flag to specify it the value must be serialized before being put into the cache", defaultValue : "false" };
+
+            getTest('cacheInstance', null, {
+                title:"Cache instance", description:"Get Ignite Cache",
+                action:"Instance", params : [ paramCache ], defPanel: true
+            });
+
+            getTest('cachePut', null, {
+                title:"Cache put", description:"Add an entry to a cache",
+                action:"Put", params : [ paramCache, paramKey,
+                  { id : "value", label : "Cache entry value, must be serializable", defaultValue : "value" },
+                  { id : "expiryPolicy", label : "Expiry policy", defaultValue : "CREATED_EXPIRY_POLICY" },
+                  { id : "entryTTL", label : "Entry TTL (<=0 never expires)", defaultValue : "0" },
+                  { id : "entryTTLTimeUnit", label : "Entry TTL unit", defaultValue : "SECONDS" },
+                  paramMustSerialize,
+                  { id : "async", label : "Execute operation asynchronously", defaultValue : "false" }
+                  ]
+            });
+
+            getTest('cacheGet', null, {
+                title:"Cache get", description:"Get entry from cache",
+                action:"Get", params : [ paramCache, paramKey,
+                  { id : "mustDeserialize", label : "Flag to specify it the value must be serialized after being get from the cache", defaultValue : "false" }
+                  ]
+            });
+
+            getTest('cacheContains', null, {
+                title:"Cache contains", description:"Checks if cache contains a key",
+                action:"Contains", params : [ paramCache, paramKey ]
+            });
+
+            getTest('cacheClear', null, {
+                title:"Cache clear", description:"Delete all data from cache",
+                action:"Clear", params : [ paramCache ]
+            });
+
+            getTest('cacheReplaceIfExists', null, {
+                title:"Cache replace if exists", description:"Replace entry if it previously exists",
+                action:"ReplaceIfExists", params : [ paramCache, paramKey,
+                  { id : "value", label : "Value to set if the cache entry already exists, must be serializable", defaultValue : "Other value" },
+                  paramMustSerialize
+                 ]
+            });
+
+            getTest('cacheReplaceIfEquals', null, {
+                title:"Cache replace if equals", description:"Replace entry if privously exists and equals to given expected value",
+                action:"ReplaceIfEquals", params : [ paramCache, paramKey,
+                  { id : "expectedValue", label : "Cache entry expected value, must be serializable", defaultValue : "value" },
+                  { id : "value", label : "New value to set if the condition is met", defaultValue : "Another value" },
+                  paramMustSerialize
+                 ]
+            });
+
+            getTest('cacheRemove', null, {
+                title:"Cache remove", description:"Checks if cache contains a key",
+                action:"Remove", params : [ paramCache, paramKey,
+                 { id : "async", label : "Execute operation asynchronously", defaultValue : "false" } ]
+            });
+
+            getTest('cacheIngestData', null, {
+                title:"Cache Ingest Data", description:"High speed data ingestion into ignite cache",
+                action:"Ingest", params : [ paramCache,
+                 { id : "data", label : "Data to ingest (used to create the dataProvider argument at the flow)", defaultValue : "i1:i2:i3:i4:i5:i6:i7:i8:i9:i10" },
+                 { id : "numberOfIngesters", label : "The amount of concurrent ingesters", defaultValue : "2" },
+                 { id : "async", label : "Asynchronously execute then ingestion", defaultValue : "false" },
+                 { id : "allowOverwrite", label : "Overwrite existing data", defaultValue : "true" },
+                 { id : "batchSize", label : "Batch size", defaultValue : "5" },
+                 { id : "autoFlushFreq", label : "Flush frequency, id <=0 then a flush operation will be executed after each batch package", defaultValue : "0" },
+                 paramMustSerialize
+                  ]
+            });
+
+            getTest('cacheScope', null, {
+                title:"Cache scope", description:"Cache scope",
+                action:"Run Scope", params : [ paramCache,
+                 { id : "noCacheFilter", label : "Flag to deactivate caching (if true)", defaultValue : "false" },
+                paramKey,
+                 { id : "strategy", label : "Strategy (overriden at flow)", defaultValue : "It does not mater" },
+                 paramMustSerialize
+                  ]
+            });
+
+            // Triggers the loading spinner for every button that is clicked
+            $('button').click(function(){
+                $(this).button('loading');
+            });
+        });
+
+    </script>
+
+</head>
+<body>
+<div class="container">
+    <div class="panel-group" id="accordion">
+    </div>
+</div>
+</body>
+</html>

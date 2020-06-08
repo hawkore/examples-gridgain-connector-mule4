@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+
+	<flow name="initializeData">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/initializeData" allowedMethods="POST"
+			doc:name="http-in: POST /initializeData" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:cache-clear config-ref="ignConfig" cache="CACHE1" doc:name="ign: clear cache" />
+		<set-payload
+			value="#[%dw 2.0
+import java!com::hawkore::mule::apacheignite::example::rt::CacheDataInitializerHandler
+output application/java
+---
+CacheDataInitializerHandler::all()
+]"
+			doc:name="payload: all" />
+		<foreach doc:name="For Each">
+			<apache-ignite:cache-put config-ref="ignConfig" cache="CACHE1" key-ref="#[payload.id]" async="true"
+				doc:name="ign: put data" />
+		</foreach>
+		<set-payload value="ok!" doc:name="payload: ok!" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="querySql">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/querySql" allowedMethods="POST"
+			doc:name="http-in: POST /querySql" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:query-sql config-ref="ignConfig" distributedJoins="#[payload.distributedJoins]"
+			replicatedOnly="#[payload.replicatedOnly]" collocated="#[payload.collocated]" lazy="#[payload.'lazy']" local="#[payload.local]"
+			enforceJoinOrder="#[payload.enforceJoinOrder]" timeout="#[payload.timeout]"  doc:name="ign: query-sql">
+			<apache-ignite:sql-query>#[payload.sqlQuery]</apache-ignite:sql-query>
+		</apache-ignite:query-sql>
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="queryLucene">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/queryLucene" allowedMethods="POST"
+			doc:name="http-in: POST /queryLucene" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:query-lucene tableId="#[payload.tableId]" maxResults="#[payload.maxResults]"
+			local="#[payload.local]" config-ref="ignConfig" doc:name="ign: query-lucene">
+			<apache-ignite:lucene-query>#[payload.luceneQuery]</apache-ignite:lucene-query>
+		</apache-ignite:query-lucene>
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+</mule>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+
+	<flow name="utilsNodeConsistentId">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/utilsNodeConsistentId" allowedMethods="POST"
+			doc:name="http-in: POST /utilsNodeConsistentId" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:utils-node-consistent-id config-ref="ignConfig"
+			doc:name="ign: utils-node-consistent-id" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+
+	<flow name="utilsIgniteInstance">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/utilsIgniteInstance" allowedMethods="POST"
+			doc:name="http-in: POST /utilsIgniteInstance" />
+		<apache-ignite:utils-ignite-instance config-ref="ignConfig" doc:name="ign: utils-ignite-instance" />
+		<set-payload value="#[java!com::hawkore::mule::apacheignite::example::rt::Utils::toString(payload)]"
+			doc:name="payload: to-string" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+</mule>

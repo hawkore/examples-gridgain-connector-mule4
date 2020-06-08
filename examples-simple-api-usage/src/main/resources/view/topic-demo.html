@@ -1,0 +1,60 @@
+<!--
+
+    (c) 2018 HAWKORE, S.L. - All Rights Reserved
+    Unauthorized copying of this file, via any medium is strictly prohibited
+    Proprietary and confidential
+
+    A copy of the license terms has been included with this distribution in the LICENSE.md file.
+    ---
+    Derechos de Autor (C) 2018 HAWKORE, S.L. - Todos los derechos reservados
+    Se prohibe estrictamente la copia sin autorización de este fichero por cualquier medio
+    Propietario y confidencial
+
+    Se incluye una copia de los términos de la licencia en el archivo LICENSE.md en esta distribución.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- JQuery will be required for this demo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <script src="js/demo.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready( function() {
+
+            getTest(
+              'topicPublish', null, {
+                title:"Topic listener - publish and retrieve", description:"Publishes into the topic the given data",
+                action:"Publish", params : [
+                 { id : "topic", label : "The name of the topic", defaultValue : "TOPIC" },
+                 { id : "item", label : "The item to publish, must be serializable", defaultValue : "a content" },
+                 { id : "subscribersGroup", label : "Subscribers to send to: ANY/LOCAL_ONLY/REMOTE_ONLY", defaultValue : "ANY" },
+                  ], defPanel: true
+              },
+              'topicListener_retrieve', {
+                title:"Topic listener - publish and retrieve", description:"Retrieve items consumed by topic listener",
+                action:"Retrieve", params : [ ]
+              }
+            );
+
+            // Triggers the loading spinner for every button that is clicked
+            $('button').click(function(){
+                $(this).button('loading');
+            });
+        }); 
+    </script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="panel-group" id="accordion"></div>
+    </div>
+</body>
+</html>

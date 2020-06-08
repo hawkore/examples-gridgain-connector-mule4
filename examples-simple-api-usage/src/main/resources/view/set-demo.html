@@ -1,0 +1,83 @@
+<!--
+
+    (c) 2018 HAWKORE, S.L. - All Rights Reserved
+    Unauthorized copying of this file, via any medium is strictly prohibited
+    Proprietary and confidential
+
+    A copy of the license terms has been included with this distribution in the LICENSE.md file.
+    ---
+    Derechos de Autor (C) 2018 HAWKORE, S.L. - Todos los derechos reservados
+    Se prohibe estrictamente la copia sin autorización de este fichero por cualquier medio
+    Propietario y confidencial
+
+    Se incluye una copia de los términos de la licencia en el archivo LICENSE.md en esta distribución.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- JQuery will be required for this demo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+
+    <!-- Keep this simple ... define CSS for this simple webpage in the same file -->
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <script src="js/demo.js"></script>
+    <script type="text/javascript">
+    
+        $(document).ready( function() {
+
+            var paramSet = { id : "set", label : "The set's name", defaultValue : "SET1" };
+            var paramItem = { id : "item", label : "The item, must be serializable", defaultValue : "an item" };
+            var paramMustSerialize = { id : "mustSerialize", label : "Serialize before add", defaultValue : "false" };
+
+            getTest('setInstance', null, {
+                title:"Set instance", description:"Retrieve the set instance (gives direct access to API)",
+                action:"Instance", params : [ paramSet ], defPanel: true
+            });
+
+            getTest('setAdd', null, {
+                title:"Set add", description:"Add an item to set",
+                action:"Add", params : [ paramSet, paramItem, paramMustSerialize ]
+            });
+
+            getTest('setRemove', null, {
+                title:"Set remove", description:"Remove an item form set",
+                action:"Remove", params : [ paramSet, paramItem, paramMustSerialize ]
+            });
+
+            getTest('setContains', null, {
+                title:"Set contains", description:"Checks if the set contains the given item",
+                action:"Contains", params : [ paramSet, paramItem, paramMustSerialize ]
+            });
+
+            getTest('setClear', null, {
+                title:"Set clear", description:"Clear the set specified by its name",
+                action:"Clear", params : [ paramSet ]
+            });
+
+            getTest('setIterator', null, {
+                title:"Set iterator", description:"Stream over set values (please, read MULE-8970)",
+                action:"Iterate", params : [ paramSet,
+                { id : "mustDeserialize", label : "Deserialize after retrieval", defaultValue : "false" }
+                 ]
+            });
+
+            // Triggers the loading spinner for every button that is clicked
+            $('button').click(function(){
+                $(this).button('loading');
+            });
+        });
+
+    </script>
+
+</head>
+<body>
+<div class="container">
+    <div class="panel-group" id="accordion">
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<bean id="placeholderProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+		depends-on="environment">
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="order" value="1" />
+	</bean>
+
+	<bean id="ignite.cfg" class="org.apache.ignite.configuration.IgniteConfiguration">
+
+		<property name="gridName" value="grid1" />
+		<property name="clientMode" value="false" />
+		<property name="workDirectory" value="${user.dir}/grid1/work" />
+
+		<property name="metricsLogFrequency" value="0" />
+
+ 		<property name="gridLogger">
+ 			<bean class="org.apache.ignite.logger.slf4j.Slf4jLogger" />
+ 		</property>
+
+		<property name="cacheConfiguration">
+			<list>
+				<bean class="org.apache.ignite.configuration.CacheConfiguration">
+					<property name="name" value="CACHE1" />
+					<property name="cacheMode" value="PARTITIONED" />
+					<property name="indexedTypes">
+						<array>
+							<value>java.lang.String</value>
+							<value>java.lang.String</value>
+							<value>java.lang.String</value>
+							<value>com.hawkore.test.HawkoreEmployee</value>
+						</array>
+					</property>
+				</bean>
+			</list>
+		</property>
+
+		<property name="dataStorageConfiguration">
+			<bean class="org.apache.ignite.configuration.DataStorageConfiguration">
+				<property name="systemRegionInitialSize" value="104857600" /> <!-- 1024*1024*100 -->
+				<property name="defaultDataRegionConfiguration">
+					<bean class="org.apache.ignite.configuration.DataRegionConfiguration">
+						<property name="name" value="default" />
+						<property name="initialSize" value="104857600" /> <!-- 1024*1024*100 -->
+						<property name="maxSize" value="1073741824" /> <!-- 1024*1024*1024 -->
+						<property name="persistenceEnabled" value="false" />
+					</bean>
+				</property>
+			</bean>
+		</property>
+
+		<property name="userAttributes">
+			<map>
+				<entry key="ROLE" value="IGNITE_SERVER_NODE" />
+			</map>
+		</property>
+
+		<property name="discoverySpi">
+			<bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+				<!-- Initial local port to listen to. -->
+				<property name="localPort" value="47500" />
+				<property name="localAddress" value="127.0.0.1" />
+				<!-- Changing local port range. This is an optional action. -->
+				<property name="localPortRange" value="5" />
+				<property name="ipFinder">
+					<bean name="LocalIpFinder" id="LocalIpFinder"
+						class="com.hawkore.ignite.spi.discovery.tcp.ipfinder.test.IpFinder" lazy-init="true">
+						<property name="shared" value="false" />
+						<property name="addresses">
+							<list>
+								<value>127.0.0.1:47500..47505</value>
+							</list>
+						</property>
+					</bean>
+				</property>
+			</bean>
+		</property>
+
+	</bean>
+
+	<bean id="_defaultCacheConfig" class="org.apache.ignite.configuration.CacheConfiguration">
+		<property name="cacheMode" value="PARTITIONED" />
+		<property name="atomicityMode" value="ATOMIC" />
+		<property name="writeSynchronizationMode" value="FULL_SYNC" />
+		<property name="backups" value="1" />
+		<property name="dataRegionName" value="default" />
+	</bean>
+
+	<bean id="_defaultQueueConfig" class="org.apache.ignite.configuration.CollectionConfiguration">
+		<property name="atomicityMode" value="ATOMIC" />
+		<property name="backups" value="1" />
+		<property name="collocated" value="true" />
+	</bean>
+
+	<bean id="_defaultObjectStoreConfig" class="org.apache.ignite.configuration.CacheConfiguration">
+		<property name="cacheMode" value="PARTITIONED" />
+		<property name="atomicityMode" value="ATOMIC" />
+		<property name="writeSynchronizationMode" value="FULL_SYNC" />
+		<property name="backups" value="1" />
+		<property name="dataRegionName" value="default" />
+	</bean>
+
+</beans>

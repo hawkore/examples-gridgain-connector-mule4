@@ -1,0 +1,67 @@
+<!--
+
+    (c) 2018 HAWKORE, S.L. - All Rights Reserved
+    Unauthorized copying of this file, via any medium is strictly prohibited
+    Proprietary and confidential
+
+    A copy of the license terms has been included with this distribution in the LICENSE.md file.
+    ---
+    Derechos de Autor (C) 2018 HAWKORE, S.L. - Todos los derechos reservados
+    Se prohibe estrictamente la copia sin autorización de este fichero por cualquier medio
+    Propietario y confidencial
+
+    Se incluye una copia de los términos de la licencia en el archivo LICENSE.md en esta distribución.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- JQuery will be required for this demo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <script src="js/demo.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready( function() {
+            // the batch is divided in two: send data to execute and query the result set at onComplete
+            getTest('batch');
+            getTest('batch_getOnComplete');
+        }); 
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="panel-group" id="accordion">
+        
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 class="panel-title demo-heading">
+                        <a data-toggle="collapse" data-parent="#accordion" href="#batchDiv">Batch</a>
+                    </h2>
+                </div>
+                <div id="batchDiv" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <form id="batchForm" class="demo-form" role="form">
+                            <label for="items">Items to send to the batch joined by ':' character:</label>
+                            <input type="text" id="items" name="items" required class="form-control" value="1:2:3:4:5"/><br>
+                            <label for="message">Response</label>
+                            <pre name="message"></pre>
+                            <button type="submit" class="btn btn-lg btn-primary btn-block" data-loading-text="<img src='http://i.giphy.com/lijuimVKUcwRa.gif' height=16 width=16 /> Processing...">Batch</button><br>
+                        </form>
+                        <form id="batch_getOnCompleteForm" class="demo-form" role="form">
+                            <label>Retrieve batch execution result, stored at onComplete section</label>
+                            <label for="message">Response</label>
+                            <pre name="message"></pre>
+                            <button type="submit" class="btn btn-lg btn-primary btn-block" data-loading-text="<img src='http://i.giphy.com/lijuimVKUcwRa.gif' height=16 width=16 /> Processing...">Batch getOnComplete</button><br>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

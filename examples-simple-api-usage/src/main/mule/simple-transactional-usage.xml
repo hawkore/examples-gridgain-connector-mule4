@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+
+	<flow name="transactionalScope">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/transactionalScope" allowedMethods="POST"
+			doc:name="http-in: POST /transactionalScope" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<set-variable variableName="cache" value="#[payload.cache]" doc:name="var: cache" />
+		<set-variable variableName="fail" value="#[payload.fail]" doc:name="var: fail" />
+		<set-variable variableName="key1" value="#[payload.key1]" doc:name="var: key1" />
+		<set-variable variableName="key2" value="#[payload.key2]" doc:name="var: key2" />
+		<set-variable variableName="val1" value="#[payload.val1]" doc:name="var: val1" />
+		<set-variable variableName="val2" value="#[payload.val2]" doc:name="var: val2" />
+		<apache-ignite:cache-remove config-ref="ignConfig" cache="#[vars.cache]" key-ref="#[vars.key1]"
+			doc:name="ign: cache remove 1" />
+		<apache-ignite:cache-remove config-ref="ignConfig" cache="#[vars.cache]" key-ref="#[vars.key2]"
+			doc:name="ign: cache remove 2" />
+		<flow-ref name="transactionalScope__transaction" doc:name="transactionalScope_transaction" />
+		<flow-ref name="transactionalScope_mkresponse" doc:name="transactionalScope_mkresponse" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="transactionalScope__error" name="transactionalScope__error" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<sub-flow name="transactionalScope__error">
+		<choice doc:name="Choice" doc:id="318ab85c-7d82-4529-bac1-5deea1093d9f">
+			<when expression="#[java!com::hawkore::mule::apacheignite::example::rt::Utils::isIllegalStateException(error) ]">
+				<flow-ref name="transactionalScope_mkresponse" doc:name="transactionalScope_mkresponse" />
+			</when>
+			<otherwise>
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</otherwise>
+		</choice>
+
+	</sub-flow>
+
+	<flow name="transactionalScope__transaction">
+		<apache-ignite:transactional-scope manager-ref="ignite1" doc:name="Transactional - Scope">
+			<apache-ignite:cache-put config-ref="ignConfig" cache="#[vars.cache]" key-ref="#[vars.key1]"
+				value-ref="#[vars.val1]" doc:name="ign: cache put 1" />
+			<set-payload value="#[java!com::hawkore::mule::apacheignite::example::rt::Utils::fail(vars.fail)]"
+				doc:name="Fail?" />
+			<apache-ignite:cache-put config-ref="ignConfig" cache="#[vars.cache]" key-ref="#[vars.key2]"
+				value-ref="#[vars.val2]" doc:name="ign: cache put 2" />
+		</apache-ignite:transactional-scope>
+	</flow>
+
+	<flow name="transactionalScope_mkresponse">
+		<apache-ignite:cache-get config-ref="ignConfig" cache="#[vars.cache]" key-ref="#[vars.key1]"
+			doc:name="ign: cache get 1" target="v1" />
+		<apache-ignite:cache-get config-ref="ignConfig" cache="#[vars.cache]" key-ref="#[vars.key2]"
+			doc:name="ign: cache get 2" target="v2" />
+		<set-payload value="#[java!com::hawkore::mule::apacheignite::example::rt::Utils::concat(vars.v1, vars.v2)]" 
+			mimeType="text/plain" doc:name="payload: t1-t2" />
+	</flow>
+
+</mule>

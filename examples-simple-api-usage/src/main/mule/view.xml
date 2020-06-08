@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+	<flow name="faviconFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/favicon.ico" doc:name="HTTP"
+			allowedMethods="GET">
+			<http:response statusCode="200">
+				<http:headers>
+					#[{'Content-Type' : 'image/x-icon'}]
+				</http:headers>
+			</http:response>
+		</http:listener>
+		<http:load-static-resource doc:name="favicon" resourceBasePath="${app.home}/favicon.ico"
+			defaultFile="favicon.ico" />
+	</flow>
+	<flow name="viewFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/view/*" doc:name="HTTP" allowedMethods="GET" />
+		<http:load-static-resource doc:name="Load static resource" resourceBasePath="${app.home}/view"
+			defaultFile="view.html" />
+	</flow>
+
+
+
+</mule>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+
+	<flow name="topicPublish">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/topicPublish" allowedMethods="POST"
+			doc:name="http-in: POST /topicPublish" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:topic-publish config-ref="ignConfig" topic="#[payload.topic]" item-ref="#[payload.item]"
+			subscribersGroup="#[payload.subscribersGroup]" doc:name="GridGain: topic-publish" />
+		<set-payload value="{&quot;res&quot;:&quot;success!&quot;}" mimeType="application/json" doc:name="payload:true" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="topicListener">
+		<apache-ignite:topic-listener config-ref="ignConfig" topic="TOPIC" doc:name="ign: topic-listener" />
+		<set-payload
+			value="#[%dw 2.0
+import java!com::hawkore::mule::apacheignite::example::rt::MessageReceivedHandler
+output application/java
+---
+MessageReceivedHandler::add(payload)
+]"
+			doc:name="MessageReceived" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="topicListener_retrieve">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/topicListener_retrieve" allowedMethods="POST"
+			doc:name="http-in: POST /topicListener_retrieve" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<set-payload
+			value="#[%dw 2.0
+import java!com::hawkore::mule::apacheignite::example::rt::MessagesFromQueueHandler
+output application/json
+---
+MessagesFromQueueHandler::removeAll()
+]"
+			doc:name="json MessagesFromTopic" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

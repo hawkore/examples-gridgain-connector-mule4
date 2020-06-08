@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+
+	<flow name="atomicLongGet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicLongGet" allowedMethods="POST"
+			doc:name="http-in: /atomicLongGet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" doc:id="725ec55d-c960-4e88-9f4b-5ba465c797b7"/>
+		<apache-ignite:atomic-long-get doc:name="atomlong: get" atomic="#[payload.atomic]"
+			config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicLongAddAndGet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicLongAddAndGet" allowedMethods="POST"
+			doc:name="http-in: /atomicLongAddAndGet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-long-add-and-get doc:name="atomlong: add-and-get"
+			valueToAdd="#[payload.valueToAdd]" atomic="#[payload.atomic]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicLongGetAndAdd">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicLongGetAndAdd" allowedMethods="POST"
+			doc:name="http-in: /atomicLongGetAndAdd" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-long-get-and-add doc:name="atomlong: get-and-add"
+			valueToAdd="#[payload.valueToAdd]" atomic="#[payload.atomic]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicLongGetAndSet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicLongGetAndSet" allowedMethods="POST"
+			doc:name="http-in: /atomicLongGetAndSet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-long-get-and-set doc:name="atomlong: get-and-set"
+			valueToSet="#[payload.valueToSet]" atomic="#[payload.atomic]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicLongCompareAndSet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicLongCompareAndSet" allowedMethods="POST"
+			doc:name="http-in: /atomicLongCompareAndSet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-long-compare-and-set doc:name="atomlong: compare-and-set"
+			expected="#[payload.expected]" newValue="#[payload.newValue]" atomic="#[payload.atomic]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicLongDecrementAndGet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicLongDecrementAndGet"
+			allowedMethods="POST" doc:name="http-in: /atomicLongDecrementAndGet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-long-decrement-and-get doc:name="atomlong: decrement-and-get"
+			atomic="#[payload.atomic]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicLongGetAndDecrement">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicLongGetAndDecrement"
+			allowedMethods="POST" doc:name="http-in: /atomicLongGetAndDecrement" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-long-get-and-decrement doc:name="atomlong: get-and-decrement"
+			atomic="#[payload.atomic]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicLongGetAndIncrement">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicLongGetAndIncrement"
+			allowedMethods="POST" doc:name="http-in: /atomicLongGetAndIncrement" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-long-increment-and-get doc:name="atomlong: increment-and-get"
+			atomic="#[payload.atomic]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicLongIncrementAndGet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicLongIncrementAndGet"
+			allowedMethods="POST" doc:name="http-in: /atomicLongIncrementAndGet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-long-get-and-increment doc:name="atomlong: get-and-increment"
+			atomic="#[payload.atomic]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+</mule>

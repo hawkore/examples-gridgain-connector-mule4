@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+
+	<flow name="atomicReferenceGet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicReferenceGet" allowedMethods="POST"
+			doc:name="http-in: /atomicReferenceGet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-reference-get doc:name="atomref: get" atomic="#[payload.atomic]"
+			mustDeserialize="#[payload.mustDeserialize]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicReferenceSet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicReferenceSet" allowedMethods="POST"
+			doc:name="http-in: /atomicReferenceSet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-reference-set doc:name="atomref: set" value-ref="#[payload.value]"
+			mustSerialize="#[payload.mustSerialize]" atomic="#[payload.atomic]" config-ref="ignConfig" />
+		<set-payload value="ok!" doc:name="Set Payload" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicReferenceCompareAndSet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicReferenceCompareAndSet"
+			allowedMethods="POST" doc:name="http-in: /atomicReferenceCompareAndSet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-reference-compare-and-set doc:name="atomref: compare-and-set"
+			expected-ref="#[payload.expected]" newValue-ref="#[payload.newValue]" mustSerialize="#[payload.mustSerialize]"
+			atomic="#[payload.atomic]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+</mule>

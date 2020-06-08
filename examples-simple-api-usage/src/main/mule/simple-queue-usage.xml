@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+
+	<flow name="queueInstance">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/queueInstance" allowedMethods="POST"
+			doc:name="http-in: POST /queueInstance" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:queue-instance config-ref="ignConfig" queue="#[payload.queue]" doc:name="ign: queue-instance" />
+		<set-payload value="#[java!com::hawkore::mule::apacheignite::example::rt::Utils::toString(payload)]"
+			doc:name="payload: to-string" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="queuePublish">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/queuePublish" allowedMethods="POST"
+			doc:name="http-in: POST /queuePublish" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:queue-publish config-ref="ignConfig" queue="#[payload.queue]" item-ref="#[payload.item]"
+			timeout="#[payload.timeout]" timeoutUnit="#[payload.timeoutUnit]" doc:name="GridGain: queue-publish" />
+		<set-payload value="{&quot;res&quot;:&quot;success!&quot;}" mimeType="application/json" doc:name="payload:true" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="queueConsume">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/queueConsume" allowedMethods="POST"
+			doc:name="http-in: POST /queueConsume" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:queue-consume config-ref="ignConfig" queue="#[payload.queue]" timeout="#[payload.timeout]"
+			timeoutUnit="#[payload.timeoutUnit]" doc:name="ignite-queue: queue-consume" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="queueIngestData">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/queueIngestData" allowedMethods="POST"
+			doc:name="http-in: POST /queueIngestData" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:queue-ingest-data config-ref="ignConfig" queue="#[payload.queue]"
+			dataProvider-ref="#[%dw 2.0
+output application/java
+import java!com::hawkore::mule::apacheignite::example::rt::QueueIngestDataProvider
+---
+QueueIngestDataProvider::create(payload.data)]"
+			async="#[payload.'async']" batchSize="#[payload.batchSize]" numberOfIngesters="#[payload.numberOfIngesters]"
+			doc:name="ign: cache-ingest-data" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="queuePublishConsume">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/queuePublishConsume" allowedMethods="POST"
+			doc:name="http-in: POST /queuePublishConsume" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:queue-publish-consume config-ref="ignConfig" queue="#[payload.queue]"
+			item-ref="#[payload.item]" timeout="#[payload.timeout]" timeoutUnit="#[payload.timeoutUnit]" doc:name="GridGain: queue-publish" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="queuePublishConsume_listener">
+		<apache-ignite:queue-listener config-ref="ignConfig" queue="QUEUE_PUBCON"
+			doc:name="ign: queue-listener: QUEUE_PUBCON" />
+		<set-payload value="#[&quot;This is a reply, received value: &quot; ++ payload]" doc:name="payload: reply" />
+	</flow>
+
+	<flow name="queueListener">
+		<apache-ignite:queue-listener config-ref="ignConfig" queue="QUEUE_SRC" doc:name="ign: queue-listener" />
+		<set-payload
+			value="#[%dw 2.0
+import java!com::hawkore::mule::apacheignite::example::rt::MessageReceivedHandler
+output application/java
+---
+MessageReceivedHandler::add(payload)
+]"
+			doc:name="MessageReceived" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="queueListener_publish">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/queueListener_publish" allowedMethods="POST"
+			doc:name="http-in: POST /queueListener_publish" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:queue-publish config-ref="ignConfig" queue="#[payload.queue]" item-ref="#[payload.item]"
+			timeout="#[payload.timeout]" timeoutUnit="#[payload.timeoutUnit]" doc:name="GridGain: queue-publish" />
+		<set-payload value="{&quot;res&quot;:&quot;success!&quot;}" mimeType="application/json" doc:name="payload:true" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="queueListener_retrieve">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/queueListener_retrieve" allowedMethods="POST"
+			doc:name="http-in: POST /queueListener_retrieve" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<set-payload
+			value="#[%dw 2.0
+import java!com::hawkore::mule::apacheignite::example::rt::MessagesFromQueueHandler
+output application/json
+---
+MessagesFromQueueHandler::removeAll()
+]"
+			doc:name="json MessagesFromQueue" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

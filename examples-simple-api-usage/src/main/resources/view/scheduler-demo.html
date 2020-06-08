@@ -1,0 +1,86 @@
+<!--
+
+    (c) 2018 HAWKORE, S.L. - All Rights Reserved
+    Unauthorized copying of this file, via any medium is strictly prohibited
+    Proprietary and confidential
+
+    A copy of the license terms has been included with this distribution in the LICENSE.md file.
+    ---
+    Derechos de Autor (C) 2018 HAWKORE, S.L. - Todos los derechos reservados
+    Se prohibe estrictamente la copia sin autorización de este fichero por cualquier medio
+    Propietario y confidencial
+
+    Se incluye una copia de los términos de la licencia en el archivo LICENSE.md en esta distribución.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- JQuery will be required for this demo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <script src="js/demo.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready( function() {
+
+            var paramTaskId = { id : "taskId", label : "Scheduler task id", defaultValue : "?" };
+
+            getTest('schedulerSource_seq', null, {
+                title:"Scheduler source - get sequence value", description:"Retrieve the value of the sequence being updated by the scheduler source",
+                action:"Sequence value", params : [ ], defPanel: true
+            });
+
+            getTest('schedulerStart', null, {
+                title:"Scheduler start", description : "Start the scheduler (by default it is stoped)",
+                action:"Start", params : [ paramTaskId ]
+            });
+
+            getTest('schedulerStop', null, {
+                title:"Scheduler stop", description:"Stop scheduler",
+                action:"Stop", params : [ paramTaskId ]
+            });
+
+            getTest('schedulerReschedule', null, {
+                title:"Scheduler reschedule", description:"Publishes the given item into a queue, and then awaits for a response to be supplied on a temporal reply-To queue",
+                action:"Reschedule", params : [ paramTaskId,
+                 { id : "activeOnStart", label : "Automatically start scheduler", defaultValue : "false" },
+                 { id : "concurrencyAllowed", label : "Allow concurrent execution at multiple running runtimes", defaultValue : "false" },
+                 { id : "frequency", label : "Scheduler run frequency", defaultValue : "500" },
+                 { id : "startDelay", label : "Scheduler start delay for first execution", defaultValue : "0" } ]
+            });
+
+            getTest('schedulerRunNow', null, {
+                title:"Scheduler run now", description:"Run scheduler task",
+                action:"Run", params : [ paramTaskId ]
+            });
+
+            getTest('schedulerTasks', null, {
+                title:"Scheduler tasks", description:"Get scheduler's task configurations",
+                action:"Tasks", params : [ ]
+            });
+
+            getTest('schedulerRunList', null, {
+                title:"Scheduler run list", description:"Get Scheduler task runs",
+                action:"Run list", params : [ paramTaskId ]
+            });
+
+            // Triggers the loading spinner for every button that is clicked
+            $('button').click(function(){
+                $(this).button('loading');
+            });
+        }); 
+    </script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="panel-group" id="accordion"></div>
+    </div>
+</body>
+</html>

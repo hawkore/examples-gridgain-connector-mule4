@@ -1,0 +1,81 @@
+<!--
+
+    (c) 2018 HAWKORE, S.L. - All Rights Reserved
+    Unauthorized copying of this file, via any medium is strictly prohibited
+    Proprietary and confidential
+
+    A copy of the license terms has been included with this distribution in the LICENSE.md file.
+    ---
+    Derechos de Autor (C) 2018 HAWKORE, S.L. - Todos los derechos reservados
+    Se prohibe estrictamente la copia sin autorización de este fichero por cualquier medio
+    Propietario y confidencial
+
+    Se incluye una copia de los términos de la licencia en el archivo LICENSE.md en esta distribución.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- JQuery will be required for this demo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+
+    <!-- Keep this simple ... define CSS for this simple webpage in the same file -->
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <script src="js/demo.js"></script>
+    <script type="text/javascript">
+    
+        $(document).ready( function() {
+
+            getTest('initializeData', null, {
+                title:"Load example data", description:"Just load example data",
+                action:"Initialize", params : [], defPanel: true
+            });
+
+            getTest('querySql', null, {
+                title:"Query sql", description:"Run statement over ignite SQL distributed database",
+                action:"Query", params : [
+                { id : "sqlQuery", label : "The sql statement", defaultValue : "select * from \"CACHE1\".HawkoreEmployee" },
+                { id : "queryParams", label : "The query parameter values", defaultValue : "<NOT USED>" },
+                { id : "filters", label : "Aditional query filters", defaultValue : "<NOT USED>" },
+                { id : "sorts", label : "Aditional query sort", defaultValue : "<NOT USED>" },
+                { id : "page", label : "Retrieve a specific query page", defaultValue : "<NOT USED>" },
+                { id : "distributedJoins", label : "Distributed joins allowed", defaultValue : "true" },
+                { id : "replicatedOnly", label : "Query is over replicated tables only", defaultValue : "false" },
+                { id : "collocated", label : "Query is collocated", defaultValue : "false" },
+                { id : "lazy", label : "Lazy data retrieval", defaultValue : "false" },
+                { id : "local", label : "Query on local node only", defaultValue : "false" },
+                { id : "enforceJoinOrder", label : "Enforce join order", defaultValue : "true" },
+                { id : "timeout", label : "Timeout: Zero value disables timeout. Query will be automatically cancelled if the execution timeout is exceeded", defaultValue : "5" },
+                { id : "timeoutUnit", label : "Timeout unit", defaultValue : "SECONDS" }
+                 ]
+            });
+
+            getTest('queryLucene', null, {
+                title:"Query lucene", description:"Run a lucene query and retrieve results",
+                action:"Query", params : [
+                { id : "tableId", label : "Table to query, in ignite or SQL format (examples: mycache_myqueryentity, \"MyCache\".MyQueryEntity", defaultValue : "\"CACHE1\".HawkoreEmployee" },
+                { id : "maxResults", label : "Maximun entry count at result list", defaultValue : "2" },
+                { id : "local", label : "Run query on local node only", defaultValue : "false" },
+                { id : "luceneQuery", label : "Query to execute in lucene format (for example: name: Arturo). If not present, results will not be filtered (same as *:*).", defaultValue : "*:*" }
+                 ]
+            });
+
+            // Triggers the loading spinner for every button that is clicked
+            $('button').click(function(){
+                $(this).button('loading');
+            });
+        });
+
+    </script>
+
+</head>
+<body>
+<div class="container">
+    <div class="panel-group" id="accordion">
+    </div>
+</div>
+</body>
+</html>

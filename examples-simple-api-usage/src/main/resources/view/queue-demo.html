@@ -1,0 +1,98 @@
+<!--
+
+    (c) 2018 HAWKORE, S.L. - All Rights Reserved
+    Unauthorized copying of this file, via any medium is strictly prohibited
+    Proprietary and confidential
+
+    A copy of the license terms has been included with this distribution in the LICENSE.md file.
+    ---
+    Derechos de Autor (C) 2018 HAWKORE, S.L. - Todos los derechos reservados
+    Se prohibe estrictamente la copia sin autorización de este fichero por cualquier medio
+    Propietario y confidencial
+
+    Se incluye una copia de los términos de la licencia en el archivo LICENSE.md en esta distribución.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- JQuery will be required for this demo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <script src="js/demo.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready( function() {
+
+            var paramQueue = { id : "queue", label : "The name of the queue", defaultValue : "QUEUE1" };
+            var paramItem = { id : "item", label : "The content to be published", defaultValue : "some data" };
+            var paramTimeout = { id : "timeout", label : "How long to wait: timeout < 0 wait forever, timeout = 0 do not wait, timeout > 0 wait the specified time", defaultValue : "10" };
+            var paramTimeoutUnit = { id : "timeoutUnit", label : "Timeout unit", defaultValue : "SECONDS" };
+
+            getTest('queueInstance', null, {
+                title:"Queue instance", description:"Direct access to queue instance API",
+                action:"Instance", params : [ paramQueue ], defPanel: true
+            });
+
+            getTest('queuePublish', null, {
+                title:"Queue publish", description:"Publish data into the designed queue",
+                action:"Publish", params : [ paramQueue, paramItem, paramTimeout, paramTimeoutUnit ]
+            });
+
+            getTest('queueConsume', null, {
+                title:"Queue consume", description:"Consume data from the designed queue",
+                action:"Consume", params : [ paramQueue, paramTimeout, paramTimeoutUnit ]
+            });
+
+            getTest('queuePublishConsume', null, {
+                title:"Queue publish consume", description:"Publishes the given item into a queue, and then awaits for a response to be supplied on a temporal reply-To queue",
+                action:"PublishConsume", params : [
+                 { id : "queue", label : "The name of the queue", defaultValue : "QUEUE_PUBCON" },
+                 paramItem, paramTimeout, paramTimeoutUnit ]
+            });
+
+            // the listener is divided in two: send data to queue and query data consumed by queue listener
+
+            getTest('queueIngestData', null, {
+                title:"Queue Ingest Data", description:"High speed data ingestion into ignite queue",
+                action:"Ingest", params : [ paramQueue,
+                 { id : "data", label : "Data to ingest (used to create the dataProvider argument at the flow)", defaultValue : "i1:i2:i3:i4:i5:i6:i7:i8:i9:i10" },
+                 { id : "numberOfIngesters", label : "The amount of concurrent ingesters", defaultValue : "2" },
+                 { id : "async", label : "Asynchronously execute then ingestion", defaultValue : "false" },
+                 { id : "allowOverwrite", label : "Overwrite existing data", defaultValue : "true" },
+                 { id : "batchSize", label : "Batch size", defaultValue : "5" }
+                  ]
+            });
+
+            getTest(
+              'queueListener_publish', null, {
+                title:"Queue listener - publish and retrieve", description:"Publishes into the queue the given data",
+                action:"Publish", params : [
+                 { id : "queue", label : "The name of the queue", defaultValue : "QUEUE_SRC" },
+                 paramItem, paramTimeout, paramTimeoutUnit ]
+              },
+              'queueListener_retrieve', {
+                title:"Queue listener - publish and retrieve", description:"Retrieve items consumed by queue listener",
+                action:"Retrieve", params : [ ]
+              }
+            );
+
+            // Triggers the loading spinner for every button that is clicked
+            $('button').click(function(){
+                $(this).button('loading');
+            });
+        }); 
+    </script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="panel-group" id="accordion"></div>
+    </div>
+</body>
+</html>

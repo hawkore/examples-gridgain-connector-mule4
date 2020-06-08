@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+
+	<apache-ignite:cache-scope-strategy name="cacheScopeStrategy" manager-ref="ignite1"
+		doc:name="GridGain: Cache Scope strategy">
+		<apache-ignite:cache-def cacheName="CACHESCOPE">
+			<apache-ignite:cache-config>
+				<apache-ignite:simple-cache-configuration atomicityMode="TRANSACTIONAL" />
+			</apache-ignite:cache-config>
+		</apache-ignite:cache-def>
+	</apache-ignite:cache-scope-strategy>
+
+	<flow name="cacheInstance">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/cacheInstance" allowedMethods="POST"
+			doc:name="http-in: POST /cacheInstance" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:cache-instance config-ref="ignConfig" cache="#[payload.cache]" doc:name="ign: cache-instance" />
+		<set-payload
+			value="#[%dw 2.0
+import java!com::hawkore::mule::apacheignite::example::rt::Utils
+output application/json
+---
+Utils::toString(payload)]"
+			doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+
+	<flow name="cachePut">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/cachePut" allowedMethods="POST"
+			doc:name="http-in: POST /cachePut" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload]" doc:name="payload: form-as-map" />
+		<apache-ignite:cache-put config-ref="ignConfig" cache="#[payload.cache]" key-ref="#[payload.key]"
+			value-ref="#[payload.value]" mustSerialize="#[payload.mustSerialize]" async="#[payload.'async']" doc:name="ign: cache-put" />
+		<set-payload value="ok!" doc:name="payload: ok!" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="cacheGet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/cacheGet" allowedMethods="POST"
+			doc:name="http-in: POST /cacheGet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:cache-get config-ref="ignConfig" cache="#[payload.cache]" key-ref="#[payload.key]"
+			mustDeserialize="#[payload.mustDeserialize]" doc:name="ign: cache-get" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="cacheContains">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/cacheContains" allowedMethods="POST"
+			doc:name="http-in: POST /cacheContains" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:cache-contains config-ref="ignConfig" cache="#[payload.cache]" key-ref="#[payload.key]"
+			doc:name="ign: cache-contains" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="cacheClear">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/cacheClear" allowedMethods="POST"
+			doc:name="http-in: POST /cacheClear" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:cache-clear config-ref="ignConfig" cache="#[payload.cache]" doc:name="ign: cache-contains" />
+		<set-payload value="ok!" doc:name="payload: ok!" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="cacheReplaceIfExists">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/cacheReplaceIfExists" allowedMethods="POST"
+			doc:name="http-in: POST /cacheReplaceIfExists" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:cache-replace-if-exists config-ref="ignConfig" cache="#[payload.cache]"
+			key-ref="#[payload.key]" value-ref="#[payload.value]" mustSerialize="#[payload.mustSerialize]" doc:name="ign: cache-replace-if-exists" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="cacheReplaceIfEquals">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/cacheReplaceIfEquals" allowedMethods="POST"
+			doc:name="http-in: POST /cacheReplaceIfEquals" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:cache-replace-if-equals config-ref="ignConfig" cache="#[payload.cache]"
+			key-ref="#[payload.key]" value-ref="#[payload.value]" expectedValue-ref="#[payload.expectedValue]" mustSerialize="#[payload.mustSerialize]"
+			doc:name="ign: cache-replace-if-equals" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="cacheRemove">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/cacheRemove" allowedMethods="POST"
+			doc:name="http-in: POST /cacheRemove" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:cache-remove config-ref="ignConfig" cache="#[payload.cache]" key-ref="#[payload.key]"
+			async="#[payload.'async']" doc:name="ign: cache-remove" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="cacheIngestData">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/cacheIngestData" allowedMethods="POST"
+			doc:name="http-in: POST /cacheIngestData" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:cache-ingest-data config-ref="ignConfig" cache="#[payload.cache]"
+			dataProvider-ref="#[%dw 2.0
+import java!com::hawkore::mule::apacheignite::example::rt::CacheIngestDataProvider
+output application/json
+---
+CacheIngestDataProvider::create(payload.data)]"
+			mustSerialize="#[payload.mustSerialize]" async="#[payload.'async']" allowOverwrite="#[payload.allowOverwrite]"
+			autoFlushFreq="#[payload.autoFlushFreq]" batchSize="#[payload.batchSize]" numberOfIngesters="#[payload.numberOfIngesters]"
+			doc:name="ign: cache-ingest-data" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="cacheScope">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/cacheScope" allowedMethods="POST"
+			doc:name="http-in: POST /cacheScope" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:cache-scope strategy-ref="cacheScopeStrategy" noCacheFilter-ref="#[&quot;true&quot; == payload.noCacheFilter]"
+			key-ref="#[payload.key]" doc:name="ign: cache-scope">
+			<set-payload
+				value="#[%dw 2.0
+import java!java::lang::System
+output application/java
+---
+payload.key ++ System::currentTimeMillis()]"
+				doc:name="payload: key+epoch" />
+		</apache-ignite:cache-scope>
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+</mule>

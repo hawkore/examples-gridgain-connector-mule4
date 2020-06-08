@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+	<flow name="lockInstance" doc:id="eba9e0eb-df92-441a-90f8-724622a94951">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/lockInstance" allowedMethods="POST"
+			doc:name="http-in: POST /lockInstance" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:lock-instance doc:name="Lock - instance" config-ref="ignConfig" lock="#[payload.lock]" />
+		<set-payload value="#[java!com::hawkore::mule::apacheignite::example::rt::Utils::toString(payload)]"
+			doc:name="payload: to-string" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="lockScope">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/lockScope" allowedMethods="POST"
+			doc:name="http-in: POST /lockScope" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<set-variable variableName="lock" value="#[payload.lock]" doc:name="lock" />
+		<apache-ignite:lock-scope lock="#[vars.lock]" doc:name="Lock - Scope" timeout="#[payload.timeout]" timeoutUnit="#[payload.timeoutUnit]" 
+		manager-ref="ignite1">
+				<logger message="Lock acquired!" level="INFO" doc:name="log: payload" />
+				<set-variable variableName="sleep"
+					value="#[%dw 2.0
+import java!com::hawkore::mule::apacheignite::example::rt::Utils
+output text/plain
+---
+Utils::sleep(payload.holdMillis)
+]"
+					doc:name="Sleep" />
+		</apache-ignite:lock-scope>
+		<set-payload value="{&quot;res&quot;:&quot;success!&quot;}" mimeType="application/json" doc:name="payload: success!" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="lockScope2">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/lockScope2" allowedMethods="POST"
+			doc:name="http-in: POST /lockScope2" outputMimeType="application/json" />
+		<flow-ref name="lockScope" doc:name="fref: lockLockAndUnlock" />
+	</flow>
+
+</mule>

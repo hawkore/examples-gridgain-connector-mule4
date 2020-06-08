@@ -1,0 +1,75 @@
+<!--
+
+    (c) 2018 HAWKORE, S.L. - All Rights Reserved
+    Unauthorized copying of this file, via any medium is strictly prohibited
+    Proprietary and confidential
+
+    A copy of the license terms has been included with this distribution in the LICENSE.md file.
+    ---
+    Derechos de Autor (C) 2018 HAWKORE, S.L. - Todos los derechos reservados
+    Se prohibe estrictamente la copia sin autorización de este fichero por cualquier medio
+    Propietario y confidencial
+
+    Se incluye una copia de los términos de la licencia en el archivo LICENSE.md en esta distribución.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- JQuery will be required for this demo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+    
+    <!-- Keep this simple ... define CSS for this simple webpage in the same file -->
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <script src="js/demo.js"></script>
+    <script type="text/javascript">
+    
+        $(document).ready( function() {
+
+            var paramAtomic = { id : "atomic", label : "Atomic with which operate", defaultValue : "SEQ" };
+
+            getTest('atomicSequenceGet', null, {
+                title:"Atomic sequence get", description:"Get an atomic sequence value",
+                action:"Get", params : [ paramAtomic ], defPanel: true
+            });
+
+            getTest('atomicSequenceAddAndGet', null, {
+                title:"Atomic sequence add and get", description:"Add a value to an atomic sequence and retrieve the result",
+                action:"Add and Get", params : [ paramAtomic,
+                 { id : "valueToAdd", label : "Value to add", defaultValue : "2" }]
+            });
+
+            getTest('atomicSequenceGetAndAdd', null, {
+                title : "Atomic sequence get and add", description : "Retrieve atomic sequence value and, afterwards, add a value to the atomic",
+                action:"Get and Add", params : [ paramAtomic,
+                 { id : "valueToAdd", label : "Value to add", defaultValue : "3" }]
+            });
+
+            getTest('atomicSequenceGetAndIncrement', null, {
+                title : "Atomic long get and increment", description : "Increment by one the given sequence and retrieve it's updated value",
+                action:"Get and Increment", params : [ paramAtomic ]
+            });
+
+            getTest('atomicSequenceIncrementAndGet', null, {
+                title : "Atomic long increment and get", description : "Retrieve sequence value and, afterwards, increment its by one",
+                action:"Increment and Get", params : [ paramAtomic ]
+            });
+
+            // Triggers the loading spinner for every button that is clicked
+            $('button').click(function(){
+                $(this).button('loading');
+            });
+        });
+    </script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="panel-group" id="accordion">
+        </div>
+    </div>
+</body>
+</html>

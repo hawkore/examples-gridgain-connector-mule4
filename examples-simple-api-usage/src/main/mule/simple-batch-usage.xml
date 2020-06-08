@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd
+">
+
+	<apache-ignite:batch-scope-strategy name="batchStrategy1" doc:name="GridGain: Batch Scope strategy"
+		manager-ref="ignite1">
+		<apache-ignite:cache-def cacheName="BATCHES">
+			<apache-ignite:cache-config>
+				<apache-ignite:simple-cache-configuration atomicityMode="TRANSACTIONAL" />
+			</apache-ignite:cache-config>
+		</apache-ignite:cache-def>
+		<apache-ignite:collection-config>
+			<apache-ignite:simple-collection-configuration atomicityMode="TRANSACTIONAL" />
+		</apache-ignite:collection-config>
+	</apache-ignite:batch-scope-strategy>
+
+	<apache-ignite:batch-scope-strategy name="batchStrategy2" doc:name="GridGain: Batch Scope strategy"
+		manager-ref="ignite2">
+		<apache-ignite:cache-def cacheName="BATCHES">
+			<apache-ignite:cache-config>
+				<apache-ignite:simple-cache-configuration atomicityMode="TRANSACTIONAL" />
+			</apache-ignite:cache-config>
+		</apache-ignite:cache-def>
+		<apache-ignite:collection-config>
+			<apache-ignite:simple-collection-configuration atomicityMode="TRANSACTIONAL" />
+		</apache-ignite:collection-config>
+	</apache-ignite:batch-scope-strategy>
+
+	<flow name="batchFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/batch" allowedMethods="POST" doc:name="http-in: /batch"
+			outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:batch doc:name="Batch" strategy-ref="batchStrategy1">
+			<apache-ignite:batch-input doc:name="Batch Input">
+				<set-payload value="#[%dw 2.0
+output application/java
+---
+payload.items splitBy(/:/)]" doc:name="payload: split items" />
+			</apache-ignite:batch-input>
+			<apache-ignite:batch-step doc:name="Batch Step">
+				<set-payload value="#[payload ++ &quot;-1&quot;]" doc:name="Set Payload" />
+				<logger message="#[payload]" level="INFO" doc:name="log: payload" />
+			</apache-ignite:batch-step>
+			<apache-ignite:batch-step doc:name="Batch Step">
+				<set-payload value="#[payload ++ &quot;-2&quot;]" doc:name="Set Payload" />
+				<logger message="#[payload]" level="INFO" doc:name="log: payload" />
+			</apache-ignite:batch-step>
+			<apache-ignite:batch-on-complete doc:name="Batch On Complete">
+				<apache-ignite:atomic-reference-set config-ref="ignConfig" atomic="BATCH"
+					mustSerialize="true" doc:name="ign: atomref-set" />
+				<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+				<logger message="#[payload]" level="INFO" doc:name="log: payload" />
+			</apache-ignite:batch-on-complete>
+		</apache-ignite:batch>
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="batch_getOnCompleteFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/batch_getOnComplete" allowedMethods="POST"
+			doc:name="http-in: /batch_getOnComplete" outputMimeType="application/json" />
+		<apache-ignite:atomic-reference-get config-ref="ignConfig" atomic="BATCH"
+			mustDeserialize="true" doc:name="GridGain" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue"
+				doc:id="b377fed2-9712-4efa-99e1-975d01067d42">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="batchFlow2">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/batch2" doc:name="HTTP" outputMimeType="application/json" />
+		<apache-ignite:batch doc:name="Batch" strategy-ref="batchStrategy2">
+			<apache-ignite:batch-input doc:name="Batch Input">
+				<set-payload value="#[%dw 2.0
+output application/java
+---
+&quot;A1:A2:A3:A4:A5:A6:A7:A8:A9:A10&quot; splitBy(/:/)]"
+					doc:name="payload: 10 items" />
+			</apache-ignite:batch-input>
+			<apache-ignite:batch-step doc:name="Batch Step">
+				<set-payload value="#[payload ++ &quot;-BBB&quot;]" doc:name="Set Payload" />
+				<logger message="#[payload]" level="INFO" doc:name="log: payload" />
+			</apache-ignite:batch-step>
+			<apache-ignite:batch-step doc:name="Batch Step">
+				<set-payload value="#[payload ++ &quot;-CCC&quot;]" doc:name="Set Payload" />
+				<logger message="#[payload]" level="INFO" doc:name="log: payload" />
+			</apache-ignite:batch-step>
+			<apache-ignite:batch-on-complete doc:name="Batch On Complete">
+				<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+				<logger message="#[payload]" level="INFO" doc:name="log: payload" />
+			</apache-ignite:batch-on-complete>
+		</apache-ignite:batch>
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue"
+				doc:id="b377fed2-9712-4efa-99e1-975d01067d42">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+</mule>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+
+	<flow name="semaphoreInstance">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/semaphoreInstance" allowedMethods="POST"
+			doc:name="http-in: POST /semaphoreInstance" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:semaphore-instance config-ref="ignConfig" semaphore="#[payload.semaphore]"
+			doc:name="ign: semaphore-instance" />
+		<set-payload value="#[java!com::hawkore::mule::apacheignite::example::rt::Utils::toString(payload)]"
+			doc:name="payload: to-string" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="semaphoreAcquirePermits">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/semaphoreAcquirePermits" allowedMethods="POST"
+			doc:name="http-in: POST /semaphoreAcquirePermits" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:semaphore-acquire-permits config-ref="ignConfig" semaphore="#[payload.semaphore]"
+			permits="#[payload.permits]" timeout="#[payload.timeout]" timeoutUnit="#[payload.timeoutUnit]" doc:name="ign: semaphore-acquire-permits" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="semaphoreDrainPermits">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/semaphoreDrainPermits" allowedMethods="POST"
+			doc:name="http-in: POST /semaphoreDrainPermits" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:semaphore-drain-permits config-ref="ignConfig" semaphore="#[payload.semaphore]"
+			doc:name="ign: semaphore-drain-permits" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="semaphoreResetPermits">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/semaphoreResetPermits" allowedMethods="POST"
+			doc:name="http-in: POST /semaphoreResetPermits" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:semaphore-reset-permits config-ref="ignConfig" semaphore="#[payload.semaphore]"
+			permits="#[payload.permits]" doc:name="ign: semaphore-reset-permits" />
+		<set-payload value="{&quot;res&quot;:&quot;success!&quot;}" mimeType="application/json" doc:name="payload: success!" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="semaphoreReleasePermits">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/semaphoreReleasePermits" allowedMethods="POST"
+			doc:name="http-in: POST /semaphoreReleasePermits" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:semaphore-release-permits config-ref="ignConfig" semaphore="#[payload.semaphore]"
+			permits="#[payload.permits]" doc:name="ign: semaphore-release-permits" />
+		<set-payload value="{&quot;res&quot;:&quot;success!&quot;}" mimeType="application/json" doc:name="payload: success!" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+</mule>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+
+	<flow name="setInstance">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/setInstance" allowedMethods="POST"
+			doc:name="http-in: POST /setInstance" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:set-instance config-ref="ignConfig" set="#[payload.set]" doc:name="ign: set-instance" />
+		<set-payload value="#[java!com::hawkore::mule::apacheignite::example::rt::Utils::toString(payload)]"
+			doc:name="payload: to-string" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="setAdd">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/setAdd" allowedMethods="POST"
+			doc:name="http-in: POST /setAdd" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:set-add config-ref="ignConfig" set="#[payload.set]" item-ref="#[payload.item]"
+			mustSerialize="#[payload.mustSerialize]" doc:name="ign: set-add" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="setRemove">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/setRemove" allowedMethods="POST"
+			doc:name="http-in: POST /setRemove" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:set-remove config-ref="ignConfig" set="#[payload.set]" item-ref="#[payload.item]"
+			mustSerialize="#[payload.mustSerialize]" doc:name="ign: set-remove" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="setContains">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/setContains" allowedMethods="POST"
+			doc:name="http-in: POST /setContains" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:set-contains config-ref="ignConfig" set="#[payload.set]" item-ref="#[payload.item]"
+			mustSerialize="#[payload.mustSerialize]" doc:name="ign: set-contains" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="setClear">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/setClear" allowedMethods="POST"
+			doc:name="http-in: POST /setClear" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:set-clear config-ref="ignConfig" set="#[payload.set]" doc:name="ign: set-clear" />
+		<set-payload value="{&quot;res&quot;:&quot;success!&quot;}" mimeType="application/json" doc:name="payload: success!" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="setIterator">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/setIterator" allowedMethods="POST"
+			doc:name="http-in: POST /setIterator" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:set-iterator config-ref="ignConfig" set="#[payload.set]" doc:name="ign: set-iterator" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+</mule>

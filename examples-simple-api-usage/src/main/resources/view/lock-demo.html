@@ -1,0 +1,70 @@
+<!--
+
+    (c) 2018 HAWKORE, S.L. - All Rights Reserved
+    Unauthorized copying of this file, via any medium is strictly prohibited
+    Proprietary and confidential
+
+    A copy of the license terms has been included with this distribution in the LICENSE.md file.
+    ---
+    Derechos de Autor (C) 2018 HAWKORE, S.L. - Todos los derechos reservados
+    Se prohibe estrictamente la copia sin autorización de este fichero por cualquier medio
+    Propietario y confidencial
+
+    Se incluye una copia de los términos de la licencia en el archivo LICENSE.md en esta distribución.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- JQuery will be required for this demo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+
+    <!-- Keep this simple ... define CSS for this simple webpage in the same file -->
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <script src="js/demo.js"></script>
+    <script type="text/javascript">
+    
+        $(document).ready( function() {
+
+            var paramLock = { id : "lock", label : "The name of the Lock", defaultValue : "LOCK" };
+            var paramVmEndpoint = { id : "vmEndpoint", label : "Select the endpoint (thread) that will process the operation: lock_operations or lock_operations2", defaultValue : "lock_operations" };
+
+            getTest('lockInstance', null, {
+                title:"Lock instance", description:"Direct access to lock instance API",
+                action:"Instance", params : [ paramLock ], defPanel: true
+            });
+
+            getTest('lockScope', null, {
+                title:"Lock scope", description:"Acquires the lock if it is free within the given waiting time and then release it",
+                action:"Lock&Unlock", params : [ paramLock,
+                 { id : "timeout", label : "How long to wait: timeout < 0 wait forever, timeout = 0 do not wait, timeout > 0 wait the specified time", defaultValue : "0" },
+                 { id : "timeoutUnit", label : "The timeout unit", defaultValue : "SECONDS" },
+                 { id : "holdMillis", label : "Hold the lock during given time (milliseconds)", defaultValue : "5000" } ]
+            }, "lockScope2", {
+                title:"Lock scope2", description:"Acquires the lock if it is free within the given waiting time and then release it",
+                action:"Lock&Unlock", params : [ paramLock,
+                 { id : "timeout", label : "How long to wait: timeout < 0 wait forever, timeout = 0 do not wait, timeout > 0 wait the specified time", defaultValue : "0" },
+                 { id : "timeoutUnit", label : "The timeout unit", defaultValue : "SECONDS" },
+                 { id : "holdMillis", label : "Hold the lock during given time (milliseconds)", defaultValue : "5000" } ]
+            }
+            );
+
+            // Triggers the loading spinner for every button that is clicked
+            $('button').click(function(){
+                $(this).button('loading');
+            });
+        });
+
+    </script>
+
+</head>
+<body>
+<div class="container">
+    <div class="panel-group" id="accordion">
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:apache-ignite="http://www.mulesoft.org/schema/mule/apache-ignite"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/apache-ignite http://www.mulesoft.org/schema/mule/apache-ignite/current/mule-apache-ignite.xsd">
+
+	<flow name="atomicStampedGetValue">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicStampedGetValue" allowedMethods="POST"
+			doc:name="http-in: /atomicStampedGetValue" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-stamped-get-value doc:name="atomstamp: get-value" atomic="#[payload.atomic]"
+			mustDeserialize="#[payload.mustDeserialize]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicStampedGetStamp">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicStampedGetStamp" allowedMethods="POST"
+			doc:name="http-in: /atomicStampedGetStamp" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-stamped-get-stamp doc:name="atomstamp: get-stamp" atomic="#[payload.atomic]"
+			mustDeserialize="#[payload.mustDeserialize]" config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicStampedSet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicStampedSet" allowedMethods="POST"
+			doc:name="http-in: /atomicStampedSet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-stamped-set doc:name="atomstamp: stamped-set" atomic="#[payload.atomic]"
+			value-ref="#[payload.value]" stamp-ref="#[payload.stamp]" mustSerialize="#[payload.mustSerialize]" config-ref="ignConfig" />
+		<set-payload value="ok!" doc:name="Set Payload" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+	<flow name="atomicStampedCompareAndSet">
+		<http:listener config-ref="HTTP_Listener_Configuration" path="/atomicStampedCompareAndSet"
+			allowedMethods="POST" doc:name="http-in: /atomicStampedCompareAndSet" outputMimeType="application/json" />
+		<set-payload value="#[%dw 2.0
+output application/java
+---
+payload
+]" doc:name="payload: form-as-map" />
+		<apache-ignite:atomic-stamped-compare-and-set doc:name="atomstamp: compare-and-set"
+			atomic="#[payload.atomic]" expectedValue-ref="#[payload.expectedValue]" expectedStamp-ref="#[payload.expectedStamp]"
+			newValue-ref="#[payload.newValue]" newStamp-ref="#[payload.newStamp]" mustSerialize="#[payload.mustSerialize]"
+			config-ref="ignConfig" />
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+message.payload]" doc:name="payload: json" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+				<flow-ref doc:name="exceptionStrategy" name="exceptionStrategy" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+</mule>

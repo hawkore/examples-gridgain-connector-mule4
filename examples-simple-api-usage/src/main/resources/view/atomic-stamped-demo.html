@@ -1,0 +1,78 @@
+<!--
+
+    (c) 2018 HAWKORE, S.L. - All Rights Reserved
+    Unauthorized copying of this file, via any medium is strictly prohibited
+    Proprietary and confidential
+
+    A copy of the license terms has been included with this distribution in the LICENSE.md file.
+    ---
+    Derechos de Autor (C) 2018 HAWKORE, S.L. - Todos los derechos reservados
+    Se prohibe estrictamente la copia sin autorización de este fichero por cualquier medio
+    Propietario y confidencial
+
+    Se incluye una copia de los términos de la licencia en el archivo LICENSE.md en esta distribución.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- JQuery will be required for this demo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+    
+    <!-- Keep this simple ... define CSS for this simple webpage in the same file -->
+    <link rel="stylesheet" type="text/css" href="css/demo.css"/>
+    <script src="js/demo.js"></script>
+    <script type="text/javascript">
+    
+        $(document).ready( function() {
+
+            var paramAtomic = { id : "atomic", label : "Atomic with which operate", defaultValue : "STAMP" };
+            var paramSerialize = { id : "mustSerialize", label : "Flag to specify if the data must be serialized before being set", defaultValue : "false" };
+            var paramDeserialize = { id : "mustDeserialize", label : "Flag to specify if the data must be deserialized after being read", defaultValue : "false" };
+
+            getTest('atomicStampedGetValue', null, {
+                title:"Atomic stamped get value", description:"Get an atomic stamped value part",
+                action:"Get Value", params : [ paramAtomic, paramDeserialize ], defPanel: true
+            });
+
+            getTest('atomicStampedGetStamp', null, {
+                title:"Atomic stamped get stamp", description:"Get an atomic stamped stamp part",
+                action:"Get Stamp", params : [ paramAtomic, paramDeserialize ]
+            });
+
+            getTest('atomicStampedSet', null, {
+                title : "Atomic stamped set", description : "Set atomic stamped value and stamp parts",
+                action: "Set", params : [ paramAtomic,
+                 { id : "value", label : "Value to set, must be serializable", defaultValue : "A string value" },
+                 { id : "stamp", label : "Stamp to set, must be serializable", defaultValue : "A stamp" },
+                 paramSerialize ]
+            });
+
+            getTest('atomicStampedCompareAndSet', null, {
+                title : "Atomic stamped compare and set", description : "Compare an atomic stamped value and stamp parts and, if equals to expected, update them to given values",
+                action: "Set", params : [ paramAtomic,
+                 { id : "expectedValue", label : "Expected AtomicStamped's value, must be serializable", defaultValue : "A string value" },
+                 { id : "expectedStamp", label : "expected AtomicStamped's value, must be serializable", defaultValue : "A stamp" },
+                 { id : "newValue", label : "New AtomicStamped's value, must be serializable", defaultValue : "Another string value" },
+                 { id : "newStamp", label : "New AtomicStamped's stamp, must be serializable", defaultValue : "Another stamp" },
+                 paramSerialize ]
+            });
+
+            // Triggers the loading spinner for every button that is clicked
+            $('button').click(function(){
+                $(this).button('loading');
+            });
+        });
+    </script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="panel-group" id="accordion">
+        </div>
+    </div>
+</body>
+</html>
