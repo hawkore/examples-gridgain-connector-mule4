@@ -1,4 +1,4 @@
-# Hawkore's GridGain connector for Mule 4
+# Connect GridGain with Mule 4
 
 _[GridGain®](https://www.gridgain.com) is a memory-centric distributed database, caching, and processing platform for transactional, 
 analytical and streaming workloads, delivering in-memory speeds at petabyte scale build on top of [Apache Ignite®](https://ignite.apache.org)._
